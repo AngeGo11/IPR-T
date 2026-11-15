@@ -1,0 +1,328 @@
+version: 2
+
+models:
+  - name: dim_country
+    columns:
+      - name: id_dim_country
+        description: Clé technique du pays.
+        tests:
+          - unique
+          - not_null
+      - name: cd_country
+        description: Code du pays. Valeur actuelle FR.
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_region
+    columns:
+      - name: id_dim_region
+        description: Clé technique de la région.
+        tests:
+          - unique
+          - not_null
+      - name: cd_region
+        description: Code de la région.
+        tests:
+          - unique
+          - not_null
+      - name: id_dim_country
+        description: Pays de la région. Pointe vers dim_country.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_country')
+                field: id_dim_country
+
+  - name: dim_department
+    columns:
+      - name: id_dim_department
+        description: Clé technique du département.
+        tests:
+          - unique
+          - not_null
+      - name: cd_department
+        description: Code du département.
+        tests:
+          - unique
+          - not_null
+      - name: id_dim_region
+        description: Région du département. Pointe vers dim_region.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_region')
+                field: id_dim_region
+
+  - name: dim_postal_code
+    columns:
+      - name: id_dim_postal_code
+        description: Clé technique du code postal. Une ligne par code postal.
+        tests:
+          - unique
+          - not_null
+      - name: cd_postal
+        description: Code postal. Clé de jointure avec le code postal de l'emprunteur.
+        tests:
+          - unique
+          - not_null
+      - name: id_dim_department
+        description: Département rattaché au code postal. Pointe vers dim_department.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_department')
+                field: id_dim_department
+
+  - name: dim_calendar
+    columns:
+      - name: id_dim_calendar
+        description: Clé technique de la date, au format AAAAMMJJ.
+        tests:
+          - unique
+          - not_null
+      - name: dt_calendar
+        description: Jour du calendrier.
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_type_pret
+    columns:
+      - name: id_dim_type_pret
+        description: Clé technique du type de prêt.
+        tests:
+          - unique
+          - not_null
+      - name: cd_type_pret
+        description: Code métier du type de prêt.
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_statut_pret
+    columns:
+      - name: id_dim_statut_pret
+        description: Clé technique du statut de prêt.
+        tests:
+          - unique
+          - not_null
+      - name: cd_statut_pret
+        description: Code métier du statut de prêt.
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_type_emprunteur
+    columns:
+      - name: id_dim_type_emprunteur
+        description: Clé technique du type d'emprunteur.
+        tests:
+          - unique
+          - not_null
+      - name: cd_type_emprunteur
+        description: Code métier du type d'emprunteur.
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_statut_emprunteur
+    columns:
+      - name: id_dim_statut_emprunteur
+        description: Clé technique du statut d'emprunteur.
+        tests:
+          - unique
+          - not_null
+      - name: cd_statut_emprunteur
+        description: Code métier du statut d'emprunteur.
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_mode_remboursement
+    columns:
+      - name: id_dim_mode_remboursement
+        description: Clé technique du mode de remboursement.
+        tests:
+          - unique
+          - not_null
+      - name: cd_mode_remboursement
+        description: Code métier du mode de remboursement.
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_periodicite_remboursement
+    columns:
+      - name: id_dim_periodicite_remboursement
+        description: Clé technique de la périodicité de remboursement.
+        tests:
+          - unique
+          - not_null
+      - name: cd_periodicite_remboursement
+        description: Code métier de la périodicité de remboursement.
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_emprunteur
+    columns:
+      - name: id_dim_emprunteur
+        description: Clé technique d'une version de l'emprunteur. Unique même quand le SCD2 crée plusieurs versions.
+        tests:
+          - unique
+          - not_null
+      - name: id_emprunteur
+        description: Identifiant métier de l'emprunteur. Identique sur toutes les versions SCD2.
+        tests:
+          - not_null
+      - name: valid_from
+        description: Début de validité de la version. La première version démarre au 01/01/1900.
+        tests:
+          - not_null
+      - name: id_dim_type_emprunteur
+        description: Type de l'emprunteur pour cette version. Pointe vers dim_type_emprunteur.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_type_emprunteur')
+                field: id_dim_type_emprunteur
+      - name: id_dim_statut_emprunteur
+        description: Statut de l'emprunteur pour cette version. Pointe vers dim_statut_emprunteur.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_statut_emprunteur')
+                field: id_dim_statut_emprunteur
+      - name: id_dim_postal_code
+        description: Code postal de l'emprunteur. Vide si l'emprunteur n'a pas de code postal.
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_postal_code')
+                field: id_dim_postal_code
+
+  - name: fact_pret
+    columns:
+      - name: id_pret
+        description: Identifiant métier du prêt. Une ligne par prêt.
+        tests:
+          - unique
+          - not_null
+      - name: id_dim_emprunteur
+        description: Version de l'emprunteur valide à la date du prêt. Pointe vers dim_emprunteur.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_emprunteur')
+                field: id_dim_emprunteur
+      - name: id_dim_type_pret
+        description: Type du prêt. Pointe vers dim_type_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_type_pret')
+                field: id_dim_type_pret
+      - name: id_dim_statut_pret
+        description: Statut du prêt. Pointe vers dim_statut_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_statut_pret')
+                field: id_dim_statut_pret
+      - name: id_dim_periodicite_remboursement
+        description: Périodicité de remboursement du prêt. Pointe vers dim_periodicite_remboursement.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_periodicite_remboursement')
+                field: id_dim_periodicite_remboursement
+      - name: id_dim_calendar
+        description: Date du prêt. Pointe vers dim_calendar.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_calendar')
+                field: id_dim_calendar
+      - name: mt_pret
+        description: Montant du prêt, en euros.
+        tests:
+          - not_null
+
+  - name: fact_remboursement
+    columns:
+      - name: id_remboursement
+        description: Identifiant métier du remboursement. Une ligne par remboursement.
+        tests:
+          - unique
+          - not_null
+      - name: id_pret
+        description: Prêt remboursé. Pointe vers fact_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fact_pret')
+                field: id_pret
+      - name: id_dim_emprunteur
+        description: Version de l'emprunteur valide à la date du remboursement. Pointe vers dim_emprunteur.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_emprunteur')
+                field: id_dim_emprunteur
+      - name: id_dim_type_pret
+        description: Type du prêt remboursé. Pointe vers dim_type_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_type_pret')
+                field: id_dim_type_pret
+      - name: id_dim_statut_pret
+        description: Statut du prêt remboursé. Pointe vers dim_statut_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_statut_pret')
+                field: id_dim_statut_pret
+      - name: id_dim_periodicite_remboursement
+        description: Périodicité du prêt remboursé. Pointe vers dim_periodicite_remboursement.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_periodicite_remboursement')
+                field: id_dim_periodicite_remboursement
+      - name: id_dim_mode_remboursement
+        description: Mode de remboursement. Pointe vers dim_mode_remboursement.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_mode_remboursement')
+                field: id_dim_mode_remboursement
+      - name: id_dim_calendar
+        description: Date du remboursement. Pointe vers dim_calendar.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('dim_calendar')
+                field: id_dim_calendar
+      - name: mt_rembourse
+        description: Montant total remboursé à cette date, en euros.
+        tests:
+          - not_null

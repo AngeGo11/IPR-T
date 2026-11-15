@@ -1,0 +1,186 @@
+version: 2
+
+models:
+  - name: stg_type_pret
+    columns:
+      - name: cd_type_pret
+        description: Code du type de prêt, après nettoyage et déduplication.
+        tests:
+          - unique
+          - not_null
+      - name: lib_type_pret
+        description: Libellé du type de prêt.
+        tests:
+          - not_null
+
+  - name: stg_statut_pret
+    columns:
+      - name: cd_statut_pret
+        description: Code du statut du prêt, après nettoyage et déduplication.
+        tests:
+          - unique
+          - not_null
+      - name: lib_statut_pret
+        description: Libellé du statut du prêt.
+        tests:
+          - not_null
+
+  - name: stg_type_emprunteur
+    columns:
+      - name: cd_type_emprunteur
+        description: Code du type d'emprunteur, après nettoyage et déduplication.
+        tests:
+          - unique
+          - not_null
+      - name: lib_type_emprunteur
+        description: Libellé du type d'emprunteur.
+        tests:
+          - not_null
+
+  - name: stg_statut_emprunteur
+    columns:
+      - name: cd_statut_emprunteur
+        description: Code du statut de l'emprunteur, après nettoyage et déduplication.
+        tests:
+          - unique
+          - not_null
+      - name: lib_statut_emprunteur
+        description: Libellé du statut de l'emprunteur.
+        tests:
+          - not_null
+
+  - name: stg_mode_remboursement
+    columns:
+      - name: cd_mode_remboursement
+        description: Code du mode de remboursement, après nettoyage et déduplication.
+        tests:
+          - unique
+          - not_null
+      - name: lib_mode_remboursement
+        description: Libellé du mode de remboursement.
+        tests:
+          - not_null
+
+  - name: stg_periodicite_remboursement
+    columns:
+      - name: cd_periodicite_remboursement
+        description: Code de la périodicité de remboursement, après nettoyage et déduplication.
+        tests:
+          - unique
+          - not_null
+      - name: lib_periodicite_remboursement
+        description: Libellé de la périodicité de remboursement.
+        tests:
+          - not_null
+
+  - name: stg_emprunteur
+    columns:
+      - name: id_emprunteur
+        description: Identifiant métier de l'emprunteur. Une ligne par emprunteur après déduplication.
+        tests:
+          - unique
+          - not_null
+      - name: lib_nom_emprunteur
+        description: Nom de l'emprunteur.
+        tests:
+          - not_null
+      - name: lib_prenom_emprunteur
+        description: Prénom de l'emprunteur.
+        tests:
+          - not_null
+      - name: cd_type_emprunteur
+        description: Code du type d'emprunteur. Doit exister dans stg_type_emprunteur.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_type_emprunteur')
+                field: cd_type_emprunteur
+      - name: cd_statut_emprunteur
+        description: Code du statut de l'emprunteur. Doit exister dans stg_statut_emprunteur.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_statut_emprunteur')
+                field: cd_statut_emprunteur
+
+  - name: stg_pret
+    columns:
+      - name: id_pret
+        description: Identifiant métier du prêt. Une ligne par prêt après déduplication.
+        tests:
+          - unique
+          - not_null
+      - name: id_emprunteur
+        description: Emprunteur titulaire du prêt. Doit exister dans stg_emprunteur.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_emprunteur')
+                field: id_emprunteur
+      - name: cd_type_pret
+        description: Code du type de prêt. Doit exister dans stg_type_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_type_pret')
+                field: cd_type_pret
+      - name: cd_statut_pret
+        description: Code du statut du prêt. Doit exister dans stg_statut_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_statut_pret')
+                field: cd_statut_pret
+      - name: cd_periodicite_remboursement
+        description: Code de la périodicité de remboursement. Doit exister dans stg_periodicite_remboursement.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_periodicite_remboursement')
+                field: cd_periodicite_remboursement
+      - name: dt_pret
+        description: Date de souscription du prêt.
+        tests:
+          - not_null
+      - name: mt_pret
+        description: Montant du prêt, en euros.
+        tests:
+          - not_null
+
+  - name: stg_remboursement
+    columns:
+      - name: id_remboursement
+        description: Identifiant métier du remboursement. Une ligne par remboursement après déduplication.
+        tests:
+          - unique
+          - not_null
+      - name: id_pret
+        description: Prêt concerné par le remboursement. Doit exister dans stg_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_pret')
+                field: id_pret
+      - name: cd_mode_remboursement
+        description: Code du mode de remboursement. Doit exister dans stg_mode_remboursement.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_mode_remboursement')
+                field: cd_mode_remboursement
+      - name: dt_remboursement
+        description: Date du remboursement.
+        tests:
+          - not_null
+      - name: mt_rembourse
+        description: Montant total remboursé à cette date, en euros.
+        tests:
+          - not_null

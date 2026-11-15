@@ -1,0 +1,107 @@
+version: 2
+
+models:
+  - name: gold_dim_emprunteur
+    columns:
+      - name: id_dim_emprunteur
+        description: Clé technique d'une version de l'emprunteur, reprise du Silver.
+        tests:
+          - unique
+          - not_null
+      - name: id_emprunteur
+        description: Identifiant métier de l'emprunteur. Identique sur toutes les versions SCD2.
+        tests:
+          - not_null
+      - name: cd_type_emprunteur
+        description: Code du type d'emprunteur, aplati depuis la dimension type.
+        tests:
+          - not_null
+      - name: cd_statut_emprunteur
+        description: Code du statut d'emprunteur, aplati depuis la dimension statut.
+        tests:
+          - not_null
+
+  - name: gold_dim_calendar
+    columns:
+      - name: id_dim_calendar
+        description: Clé technique de la date, limitée à la plage des prêts et des remboursements.
+        tests:
+          - unique
+          - not_null
+      - name: dt_calendar
+        description: Jour du calendrier présent dans les faits.
+        tests:
+          - unique
+          - not_null
+
+  - name: gold_fact_pret
+    columns:
+      - name: id_pret
+        description: Identifiant métier du prêt. Une ligne par prêt.
+        tests:
+          - unique
+          - not_null
+      - name: id_dim_emprunteur
+        description: Version de l'emprunteur valide à la date du prêt. Pointe vers gold_dim_emprunteur.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_emprunteur')
+                field: id_dim_emprunteur
+      - name: id_dim_calendar
+        description: Date du prêt. Pointe vers gold_dim_calendar.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_calendar')
+                field: id_dim_calendar
+      - name: mt_pret
+        description: Montant du prêt, en euros.
+        tests:
+          - not_null
+      - name: nb_pret
+        description: Compteur égal à 1. Sert à sommer le nombre de prêts dans un outil de reporting.
+        tests:
+          - not_null
+
+  - name: gold_fact_remboursement
+    columns:
+      - name: id_remboursement
+        description: Identifiant métier du remboursement. Une ligne par remboursement.
+        tests:
+          - unique
+          - not_null
+      - name: id_pret
+        description: Prêt remboursé. Pointe vers gold_fact_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_fact_pret')
+                field: id_pret
+      - name: id_dim_emprunteur
+        description: Version de l'emprunteur valide à la date du remboursement. Pointe vers gold_dim_emprunteur.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_emprunteur')
+                field: id_dim_emprunteur
+      - name: id_dim_calendar
+        description: Date du remboursement. Pointe vers gold_dim_calendar.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_calendar')
+                field: id_dim_calendar
+      - name: mt_rembourse
+        description: Montant total remboursé à cette date, en euros.
+        tests:
+          - not_null
+      - name: nb_remboursement
+        description: Compteur égal à 1. Sert à sommer le nombre de remboursements dans un outil de reporting.
+        tests:
+          - not_null
