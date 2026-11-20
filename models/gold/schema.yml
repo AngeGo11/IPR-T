@@ -34,6 +34,74 @@ models:
           - unique
           - not_null
 
+  - name: gold_dim_type_pret
+    columns:
+      - name: id_dim_type_pret
+        description: Clé technique du type de prêt, reprise du Silver.
+        tests:
+          - unique
+          - not_null
+      - name: cd_type_pret
+        description: Code métier du type de prêt.
+        tests:
+          - unique
+          - not_null
+      - name: lib_type_pret
+        description: Libellé du type de prêt.
+        tests:
+          - not_null
+
+  - name: gold_dim_statut_pret
+    columns:
+      - name: id_dim_statut_pret
+        description: Clé technique du statut de prêt, reprise du Silver.
+        tests:
+          - unique
+          - not_null
+      - name: cd_statut_pret
+        description: Code métier du statut de prêt.
+        tests:
+          - unique
+          - not_null
+      - name: lib_statut_pret
+        description: Libellé du statut de prêt.
+        tests:
+          - not_null
+
+  - name: gold_dim_periodicite_remboursement
+    columns:
+      - name: id_dim_periodicite_remboursement
+        description: Clé technique de la périodicité de remboursement, reprise du Silver.
+        tests:
+          - unique
+          - not_null
+      - name: cd_periodicite_remboursement
+        description: Code métier de la périodicité de remboursement.
+        tests:
+          - unique
+          - not_null
+      - name: lib_periodicite_remboursement
+        description: Libellé de la périodicité de remboursement.
+        tests:
+          - not_null
+
+  - name: gold_dim_mode_remboursement
+    columns:
+      - name: id_dim_mode_remboursement
+        description: Clé technique du mode de remboursement, reprise du Silver.
+        tests:
+          - unique
+          - not_null
+      - name: cd_mode_remboursement
+        description: Code métier du mode de remboursement.
+        tests:
+          - unique
+          - not_null
+      - name: lib_mode_remboursement
+        description: Libellé du mode de remboursement.
+        tests:
+          - not_null
+
   - name: gold_fact_pret
     columns:
       - name: id_pret
@@ -49,6 +117,30 @@ models:
               arguments:
                 to: ref('gold_dim_emprunteur')
                 field: id_dim_emprunteur
+      - name: id_dim_type_pret
+        description: Type du prêt. Pointe vers gold_dim_type_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_type_pret')
+                field: id_dim_type_pret
+      - name: id_dim_statut_pret
+        description: Statut du prêt. Pointe vers gold_dim_statut_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_statut_pret')
+                field: id_dim_statut_pret
+      - name: id_dim_periodicite_remboursement
+        description: Périodicité de remboursement du prêt. Pointe vers gold_dim_periodicite_remboursement.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_periodicite_remboursement')
+                field: id_dim_periodicite_remboursement
       - name: id_dim_calendar
         description: Date du prêt. Pointe vers gold_dim_calendar.
         tests:
@@ -89,6 +181,38 @@ models:
               arguments:
                 to: ref('gold_dim_emprunteur')
                 field: id_dim_emprunteur
+      - name: id_dim_type_pret
+        description: Type du prêt remboursé. Pointe vers gold_dim_type_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_type_pret')
+                field: id_dim_type_pret
+      - name: id_dim_statut_pret
+        description: Statut du prêt remboursé. Pointe vers gold_dim_statut_pret.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_statut_pret')
+                field: id_dim_statut_pret
+      - name: id_dim_periodicite_remboursement
+        description: Périodicité du prêt remboursé. Pointe vers gold_dim_periodicite_remboursement.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_periodicite_remboursement')
+                field: id_dim_periodicite_remboursement
+      - name: id_dim_mode_remboursement
+        description: Mode de remboursement. Pointe vers gold_dim_mode_remboursement.
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('gold_dim_mode_remboursement')
+                field: id_dim_mode_remboursement
       - name: id_dim_calendar
         description: Date du remboursement. Pointe vers gold_dim_calendar.
         tests:
@@ -105,3 +229,4 @@ models:
         description: Compteur égal à 1. Sert à sommer le nombre de remboursements dans un outil de reporting.
         tests:
           - not_null
+
