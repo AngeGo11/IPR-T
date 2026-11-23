@@ -1,3 +1,15 @@
+WITH validity_bounds AS (
+    -- borne basse SCD2 = MIN des dates de faits
+    SELECT
+        LEAST(
+            (SELECT MIN(dt_pret) FROM {{ ref('stg_pret') }}),
+            COALESCE(
+                (SELECT MIN(dt_remboursement) FROM {{ ref('stg_remboursement') }}),
+                (SELECT MIN(dt_pret) FROM {{ ref('stg_pret') }})
+            )
+        ) AS dt_valid_min
+)
+
 SELECT
     ROW_NUMBER() OVER (
         ORDER BY e.dbt_scd_id
@@ -5,7 +17,7 @@ SELECT
 
     CASE
         WHEN ROW_NUMBER() OVER (PARTITION BY e.id_emprunteur ORDER BY e.dbt_valid_from) = 1
-            THEN '1900-01-01'::timestamp
+            THEN b.dt_valid_min::timestamp
         ELSE e.dbt_valid_from
     END AS valid_from,
     e.dbt_valid_to AS valid_to,
@@ -22,15 +34,17 @@ SELECT
     te.id_dim_type_emprunteur,
     se.id_dim_statut_emprunteur
 
-FROM {{ref('snap_emprunteur')}} e
+FROM {{ ref('snap_emprunteur') }} e
 
-LEFT OUTER JOIN {{ref('dim_postal_code')}} pc
+CROSS JOIN validity_bounds b
+
+LEFT OUTER JOIN {{ ref('dim_postal_code') }} pc
     ON e.cd_postal_emprunteur = pc.cd_postal
 
-LEFT OUTER JOIN {{ref('dim_type_emprunteur')}} te
+LEFT OUTER JOIN {{ ref('dim_type_emprunteur') }} te
     ON e.cd_type_emprunteur = te.cd_type_emprunteur
 
-LEFT OUTER JOIN {{ref('dim_statut_emprunteur')}} se
+LEFT OUTER JOIN {{ ref('dim_statut_emprunteur') }} se
     ON e.cd_statut_emprunteur = se.cd_statut_emprunteur
 
 -- code postal absent autorisé ; code postal renseigné mais inconnu = rejet
